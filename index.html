@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+</head>
+<body>
+1、将奖品变成canvas的背景图片
+<canvas id="canvas" width="240" height="240" style="border:1px solid red;"></canvas>
+</body>
+<script src="jquery-2.1.4.js"></script>
+<script>
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    canvas.style.backgroundImage="url(烤箱.jpg)";
+
+    //2、绘制遮盖层
+    ctx.fillStyle="rgb(211,211,211)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    //为了实现看到奖品的部分内容，需要在绘制新图形的时候让原图形中与新图形中重复的部分消失，消失的部分就会变成透明，就看到了奖品的部分内容
+    ctx.globalCompositeOperation="destination-out";
+
+
+    //实现刮的效果：就是指按下鼠标不放，同时移动鼠标
+
+    $("canvas").on("mousedown",function(){
+        //鼠标还是按着的状态，此时再次绑定鼠标移动事件
+        $("canvas").on("mousemove",function(e){
+            //根据鼠标位于canvas中的坐标绘制指定的圆
+            var circleX=e.pageX-canvas.offsetLeft;
+            var circleY=e.pageY-canvas.offsetTop;
+            ctx.beginPath();
+            ctx.arc(circleX,circleY,20,0,2*Math.PI);
+            ctx.fill();
+            var obj=ctx.getImageData(0,0,canvas.width,canvas.height);
+            console.log(obj.data.length);
+            var num=0;
+            for(var i=0; i<canvas.width*canvas.height; i++) {
+                if(obj.data[4*i]==0) {
+                    num++;
+                }
+                if(num>canvas.width*canvas.height/2){
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    $("canvas").off("mousedown mousemove");
+                }
+
+            }
+
+
+        })
+    });
+    $("canvas").on("mouseup mouseleave",function(){
+        //鼠标还是按着的状态，此时再次绑定鼠标移动事件
+        $("canvas").off("mousemove");
+    });
+
+</script>
+</html>
